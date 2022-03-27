@@ -30,6 +30,7 @@ func SetUpServer() {
 func ShowBlocks(w http.ResponseWriter, req *http.Request) {
 	fmt.Print(len(BlocksChains.Blocks))
 	w.Header().Set("Content-Type", "application/json")
+	enableCors(&w)
 
 	if len(BlocksChains.Blocks) == 0 {
 		BlocksChains = service.InitGenesisBlock(BlocksChains)
@@ -47,6 +48,7 @@ func ShowBlocks(w http.ResponseWriter, req *http.Request) {
 
 func SetBlock(w http.ResponseWriter, req *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
+	enableCors(&w)
 	var viewSetBlock models.BlockData
 	viewBlock := json.NewDecoder(req.Body)
 	viewBlock.Decode(&viewSetBlock)
@@ -61,8 +63,8 @@ func SetBlock(w http.ResponseWriter, req *http.Request) {
 		for i := 0; ; i++ {
 			iteratorBlock := i
 			hashBlock, actualBlock := service.NetworkBlock(BlocksChains.Blocks, viewSetBlock, iteratorBlock, viewSetBlock.Wallet, BlocksChains)
-			fmt.Println(service.ValidateBlock(hashBlock, 2, "0"))
-			if service.ValidateBlock(hashBlock, 2, "0") {
+			//fmt.Println(service.ValidateBlock(hashBlock, 2, "0"))
+			if service.ValidateBlock(hashBlock, 4, "0") {
 				BlocksChains.Blocks = append(BlocksChains.Blocks, actualBlock)
 				//	data := BlocksChains.Wallets[viewSetBlock.Wallet]
 				//getCoins := BlocksChains.Wallets[viewSetBlock.Wallet].Coins
@@ -81,6 +83,7 @@ func SetBlock(w http.ResponseWriter, req *http.Request) {
 
 func CreateWallet(w http.ResponseWriter, req *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
+	enableCors(&w)
 	//var viewSetBlock models.BlockData
 	var walroute models.WalletAPI
 	var wallet models.Wallet
@@ -117,6 +120,7 @@ func ViewWallet(w http.ResponseWriter, req *http.Request) {
 }
 
 func GetDeviceName(w http.ResponseWriter, req *http.Request) {
+	enableCors(&w)
 	w.Header().Set("Content-Type", "application/json")
 	var walroute models.GetDeviceName
 
@@ -152,6 +156,7 @@ func GetDeviceName(w http.ResponseWriter, req *http.Request) {
 
 func PutDeviceData(w http.ResponseWriter, req *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
+	enableCors(&w)
 	var walroute models.PutDeviceData
 	var dataToBeReturned int
 	var getPermissions int
@@ -202,6 +207,10 @@ func PutDeviceData(w http.ResponseWriter, req *http.Request) {
 		json.NewEncoder(w).Encode(RetBlock)
 	}
 	fmt.Println(walroute, dataToBeReturned)
+}
+
+func enableCors(w *http.ResponseWriter) {
+	(*w).Header().Set("Access-Control-Allow-Origin", "*")
 }
 
 func writeDataFileDisk(filenameTowrite string, content string) {
